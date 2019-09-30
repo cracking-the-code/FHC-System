@@ -87,7 +87,6 @@ public class StoreSubs implements StoreProcess
 				String time = new Timestamp(System.currentTimeMillis()).toString();
 				
 				
-				
                 logger.info("\nMensaje Recibido" +
                         "\n\tTime:    " + time + 
                         "\n\tTopic:   " + topic + 
