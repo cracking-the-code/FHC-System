@@ -1,7 +1,6 @@
 package storeProcess;
 
 import java.sql.Timestamp;
-import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,55 +12,60 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
-import dataLayer.SpMySQL;
-import dataLayer.SpPersistence;
-import dataLayer.SubMessage_Dto;
 import infraLayer.ConfigClass;
 
-public class StoreSubs implements StoreProcess
+public class SpManager implements SpManagerInterface
 {
-	private static Logger logger = LogManager.getLogger(StoreSubs.class);
+	private static Logger logger = LogManager.getLogger(SpManager.class);
 	private ConfigClass conf = ConfigClass.getInstance();
 	
-	private List<String> lstSub;
-	private SpPersistence perDB;
+	private int connections;
 	
-	private MqttClient client;
+	private MqttClient clistartSubent;
 	private MqttConnectOptions connOpts;
 	private MemoryPersistence persistence;
 	
-	public StoreSubs()
+	public SpManager() 
 	{
-		perDB = new SpMySQL();
 		configureMqtt();
+	}
+	
+	public SpManager(int connections) 
+	{
+		configureMqtt();
+		this.connections = connections;
 	}
 	
 	private void configureMqtt() 
 	{
 		try 
 		{
+			logger.info("Se procede a configurar el cliente Mqtt");
+			
 			client = new MqttClient(conf.getServerURI(), conf.getClientID(), persistence);
 			
 			connOpts.setCleanSession(true);
 			connOpts.setUserName(conf.getUserName());
 			connOpts.setPassword(conf.getPassword().toCharArray());
+			
+			logger.info("Se ha configurado el cliente correctamente!!!");
 		} 
 		catch (MqttException e) 
 		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Ha sucedido un error en la configuracion Mqtt ");
+			logger.error(e.getMessage());
 		}
 	}
 	
 	@Override
-	public void startSubs()
+	public void startSub()
 	{
 		try
 		{
 			logger.info("Conectando al servidor: " + conf.getServerURI());
+			
 			client.connect(connOpts);
 			client.setCallback(getCallback());
-			
 			client.subscribe("Home/#");
 			
 			logger.info("Coneccion Exitosa!!!");
@@ -77,14 +81,19 @@ public class StoreSubs implements StoreProcess
 		}
 	}
 	
-	public MqttCallback getCallback() 
+	private MqttCallback getCallback() 
 	{
 		return new MqttCallback() {
 			
 			@Override
 			public void messageArrived(String topic, MqttMessage message) throws Exception
 			{
+				
+				/*==================================================================
+				 * ES AQUI DONDE VIENE EL ALGORITMO DE BALANCEO DE CARGA
+				 ===================================================================*/
 				String time = new Timestamp(System.currentTimeMillis()).toString();
+				
 				
 				
                 logger.info("\nMensaje Recibido" +
@@ -113,22 +122,22 @@ public class StoreSubs implements StoreProcess
 	}
 
 	@Override
-	public void stopSub()
+	public void stopSub() 
 	{
 		try 
 		{
 			client.close();
+			logger.info("Se hace cerrado la conexion Mqtt Exitosamente!!!");
 		} 
 		catch (MqttException e) 
 		{
-			e.printStackTrace();
+			logger.error("Error en el cerrado de la conexion Mqtt");
+			logger.error("Error: " + e.getMessage());
 		}
 	}
 
 	@Override
-	public void setSubscribers(List<String> lstSub) { this.lstSub = lstSub;	}
-
+	public void setConnections(int conn) { this.connections = conn; }
 	@Override
-	public List<String> getSubscribers() { return lstSub; }
-
+	public int getConnections() { return this.connections; }
 }

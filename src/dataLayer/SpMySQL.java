@@ -7,7 +7,7 @@ import org.apache.logging.log4j.Logger;
 
 import infraLayer.ConfigDB;
 
-public class SpMySQL implements SpPersistence
+public class SpMySQL implements SpDataBaseI
 {
 	private static Logger logger = LogManager.getLogger(SpMySQL.class);
 	private ConfigDB confDB = ConfigDB.getInstance();
@@ -15,34 +15,52 @@ public class SpMySQL implements SpPersistence
 	
 	public SpMySQL() 
 	{
-		
+		try 
+		{
+            Class.forName("com.mysql.jdbc.Driver");
+        } 
+		catch (ClassNotFoundException ex) 
+		{
+        	logger.error("Error al registrar el driver de MySQL: " + ex);
+        }
 	}
 	
 	@Override
 	public void insertSubMessage(SubMessage_Dto subMsg) 
 	{	
-		try(Connection con = DriverManager.getConnection(confDB.getUrlDB(), confDB.getUserDB(), confDB.getPassDB()))
+		try(Connection conn = DriverManager.getConnection(confDB.getUrlDB(), confDB.getUserDB(), confDB.getPassDB()))
 		{
-			Statement st = con.createStatement();
-            ResultSet rs = st.executeQuery(messageInsert(subMsg));
-            {
-            	if (rs.next())
-            	{
-            	}
-                
-                System.out.println(rs.getString(1));
-            }
+			Statement stmt = conn.createStatement();
+            stmt.executeUpdate(messageInsert(subMsg));
+            
+            logger.info("Se ha registrado el msg: " + subMsg.getIdMessage() + " en la tabla: Tbl_SubMessage");
+            
+            conn.close();
 		}
 		catch(SQLException e)
 		{
-			logger.error("");
+			logger.error("No se pudo guardar el msg: " + subMsg.getIdMessage() + " en la tabla: Tbl_SubMessage");
+			logger.error(e.getMessage());
 		}
 	}
 
 	@Override
 	public void insertDevMeasure(DeviceMeasurement_Dto devMeasur) 
 	{
-		
+		try(Connection conn = DriverManager.getConnection(confDB.getUrlDB(), confDB.getUserDB(), confDB.getPassDB()))
+		{
+			Statement stmt = conn.createStatement();
+            stmt.executeUpdate(measurementInsert(devMeasur));
+            
+            logger.info("Se ha registrado la medicion: " + devMeasur.getIdMeasurement() + " en la tabla: Tbl_DeviceMeasurement");
+            
+            conn.close();
+		}
+		catch(SQLException e)
+		{
+			logger.error("No se pudo guardar la medicion: " + devMeasur.getIdMeasurement() + " en la tabla: Tbl_DeviceMeasurement");
+			logger.error(e.getMessage());
+		}
 	}
 	
 	private String measurementInsert (DeviceMeasurement_Dto measure) 
@@ -81,12 +99,14 @@ public class SpMySQL implements SpPersistence
 
 	private String messageInsert(SubMessage_Dto message) 
 	{
+		String date = new Date(0).toString();
+		
 		String query = "INSERT INTO Tbl_SubMessage \n"
 				+ "VALUES ( \n"
 				+ message.getIdDev() + ", \n"
 				+ message.getIdMessage() + ", \n"
 				+ message.getReceivedTime() + ", \n"
-				+ message.getProcessedTime() + ", \n"
+				+ date + ", \n"
 				+ message.getTopic() + ", \n"
 				+ message.getMessage() + ", \n"
 				+ ")";
