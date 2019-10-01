@@ -11,7 +11,7 @@ public class ConfigClass
 {
 	private static ConfigClass uniqueInstance;
 	private Properties prop;
-	private String configPath = "/home/echeverri/Eclipse/mqttPubSub/resources/config.properties";
+	private String configPath = "/home/echeverri/Projects/FHC-System/resources/config.properties";
 	private static Logger logger = LogManager.getLogger(ConfigClass.class);
 	
 	private String serverURI;

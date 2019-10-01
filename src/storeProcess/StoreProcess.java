@@ -27,9 +27,14 @@ public class StoreProcess implements SpInterface
 	@Override
 	public void storeMessage(MqttMessage msg) 
 	{
+		
+		logger.info("Se almacenara Mensaje en DB");
+		
 		String payload = msg.getPayload().toString();
+		
 		DeviceMeasurement_Dto measure = deserialiceMeasure(payload);
 		SubMessage_Dto subMessage = deserialiceSubMessage(payload,"");
+		
 		db.insertDevMeasure(measure);
 		db.insertSubMessage(subMessage);
 	}

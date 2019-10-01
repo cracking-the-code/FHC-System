@@ -21,9 +21,10 @@ public class SpManager implements SpManagerInterface
 	
 	private int connections;
 	
-	private MqttClient clistartSubent;
+	private MqttClient client;
 	private MqttConnectOptions connOpts;
 	private MemoryPersistence persistence;
+	private StoreProcess sp = new StoreProcess();
 	
 	public SpManager() 
 	{
@@ -43,6 +44,7 @@ public class SpManager implements SpManagerInterface
 			logger.info("Se procede a configurar el cliente Mqtt");
 			
 			client = new MqttClient(conf.getServerURI(), conf.getClientID(), persistence);
+			connOpts = new MqttConnectOptions();
 			
 			connOpts.setCleanSession(true);
 			connOpts.setUserName(conf.getUserName());
@@ -50,10 +52,10 @@ public class SpManager implements SpManagerInterface
 			
 			logger.info("Se ha configurado el cliente correctamente!!!");
 		} 
-		catch (MqttException e) 
+		catch (Exception e) 
 		{
 			logger.error("Ha sucedido un error en la configuracion Mqtt ");
-			logger.error(e.getMessage());
+			logger.error(e);
 		}
 	}
 	
@@ -66,7 +68,7 @@ public class SpManager implements SpManagerInterface
 			
 			client.connect(connOpts);
 			client.setCallback(getCallback());
-			client.subscribe("Home/#");
+			client.subscribe("home/Monitoreo/#");
 			
 			logger.info("Coneccion Exitosa!!!");
 		}
@@ -95,6 +97,7 @@ public class SpManager implements SpManagerInterface
 				String time = new Timestamp(System.currentTimeMillis()).toString();
 				
 				
+				sp.storeMessage(message);
 				
                 logger.info("\nMensaje Recibido" +
                         "\n\tTime:    " + time + 
