@@ -17,6 +17,7 @@ public class SpMySQL implements SpDataBaseI
 	{
 		try 
 		{
+			logger.debug("\n Se procede a configurar la Base de Datos...");
             Class.forName("com.mysql.jdbc.Driver");
         } 
 		catch (ClassNotFoundException ex) 
@@ -99,7 +100,7 @@ public class SpMySQL implements SpDataBaseI
 
 	private String messageInsert(SubMessage_Dto message) 
 	{
-		String date = new Date(0).toString();
+		String date = new Timestamp(System.currentTimeMillis()).toString();
 		
 		String query = "INSERT INTO Tbl_SubMessage \n"
 				+ "VALUES ( \n"

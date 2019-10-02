@@ -24,6 +24,8 @@ public class SpManager implements SpManagerInterface
 	private MqttClient client;
 	private MqttConnectOptions connOpts;
 	private MemoryPersistence persistence;
+	
+	//La generacion de estas clases dependera del algoritmo
 	private StoreProcess sp = new StoreProcess();
 	
 	public SpManager() 
@@ -68,7 +70,7 @@ public class SpManager implements SpManagerInterface
 			
 			client.connect(connOpts);
 			client.setCallback(getCallback());
-			client.subscribe("home/Monitoreo/#");
+			client.subscribe(conf.getTopic());
 			
 			logger.info("Coneccion Exitosa!!!");
 		}
@@ -90,13 +92,14 @@ public class SpManager implements SpManagerInterface
 			@Override
 			public void messageArrived(String topic, MqttMessage message) throws Exception
 			{
-				
 				/*==================================================================
 				 * ES AQUI DONDE VIENE EL ALGORITMO DE BALANCEO DE CARGA
+				 * PERO EN LO QUE SE APLICA HACEMOS ESTO...
 				 ===================================================================*/
-				String time = new Timestamp(System.currentTimeMillis()).toString();
-				
-				
+				Timestamp time = new Timestamp(System.currentTimeMillis());
+								
+				sp.setReceivedMessage(time);
+				sp.setTopic(topic);
 				sp.storeMessage(message);
 				
                 logger.info("\nMensaje Recibido" +
