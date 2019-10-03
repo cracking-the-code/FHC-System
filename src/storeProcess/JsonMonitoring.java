@@ -5,19 +5,19 @@ public class JsonMonitoring
     private String Id;
     private boolean Active;
     private String Date;
-    Measure MeasureObject;  
+    private MeasureObject Measure;  
 
     public String getId() { return Id; }   
     public boolean getActive() { return Active; }   
     public String getDate() { return Date; }   
-    public Measure getMeasure() { return MeasureObject; }   
+    public MeasureObject getMeasure() { return Measure; }   
  
     public void setId(String Id) { this.Id = Id; }   
     public void setActive(boolean Active) { this.Active = Active; }   
     public void setDate(String Date) { this.Date = Date; }   
-    public void setMeasure(Measure MeasureObject) { this.MeasureObject = MeasureObject; }
+    public void setMeasure(MeasureObject MeasureObject) { this.Measure = MeasureObject; }
 
-    public class Measure {
+    public class MeasureObject {
         private float Power;
         private float Temp;
         private float Humidity;

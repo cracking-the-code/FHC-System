@@ -1,6 +1,7 @@
 package dataLayer;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,7 +12,6 @@ public class SpMySQL implements SpDataBaseI
 {
 	private static Logger logger = LogManager.getLogger(SpMySQL.class);
 	private ConfigDB confDB = ConfigDB.getInstance();
-	
 	
 	public SpMySQL() 
 	{
@@ -41,7 +41,7 @@ public class SpMySQL implements SpDataBaseI
 		catch(SQLException e)
 		{
 			logger.error("No se pudo guardar el msg: " + subMsg.getIdMessage() + " en la tabla: Tbl_SubMessage");
-			logger.error(e.getMessage());
+			logger.error(e);
 		}
 	}
 
@@ -60,16 +60,18 @@ public class SpMySQL implements SpDataBaseI
 		catch(SQLException e)
 		{
 			logger.error("No se pudo guardar la medicion: " + devMeasur.getIdMeasurement() + " en la tabla: Tbl_DeviceMeasurement");
-			logger.error(e.getMessage());
+			logger.error(e);
 		}
 	}
 	
 	private String measurementInsert (DeviceMeasurement_Dto measure) 
 	{
+		SimpleDateFormat dateFormat = new SimpleDateFormat("YYYYMMDDHHMMSS");
+		
 		String query = "INSERT INTO Tbl_DeviceMeasurement \n"
 				+ "VALUES ( \n"
 				+ measure.getIdDev() + ", \n"
-				+ measure.getTimeMeasure() + ", \n"
+				+ dateFormat.format(measure.getTimeMeasure()) + ", \n"
 				+ measure.getPotency() + ", \n"
 				+ measure.getVoltage() + ", \n"
 				+ measure.getCharge() + ", \n"
@@ -94,7 +96,10 @@ public class SpMySQL implements SpDataBaseI
 				+ measure.getMisc18() + ", \n"
 				+ measure.getMisc19() + ", \n"
 				+ measure.getMisc20() + " \n"
-				+ ")";
+				+ ");";
+		
+		System.out.print(query);
+		
 		return query;
 	}
 

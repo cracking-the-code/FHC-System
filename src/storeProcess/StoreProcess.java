@@ -38,6 +38,7 @@ public class StoreProcess implements SpInterface
 		{
 			String payload = new String(msg.getPayload());	
 			Gson gson = new Gson();
+			 System.out.println(payload);
 			JsonMonitoring jsonMessage = gson.fromJson(payload, JsonMonitoring.class);
 			
 			
@@ -61,7 +62,7 @@ public class StoreProcess implements SpInterface
 		try 
 		{
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-			formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+			//formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
 			
 			measure.setIdDev(json.getId());
 			measure.setTimeMeasure(formatter.parse(json.getDate()));
