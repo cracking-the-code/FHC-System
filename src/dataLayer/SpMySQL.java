@@ -1,121 +1,89 @@
 package dataLayer;
 
-import java.sql.*;
-import java.text.SimpleDateFormat;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Persistence;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import infraLayer.ConfigDB;
+import storeProcess.StoreProcess;
 
 public class SpMySQL implements SpDataBaseI
 {
-	private static Logger logger = LogManager.getLogger(SpMySQL.class);
-	private ConfigDB confDB = ConfigDB.getInstance();
+	private static final EntityManagerFactory ENTITY_MANAGER_FACTORY = Persistence
+            .createEntityManagerFactory("FHC_System");
 	
-	public SpMySQL() 
+	private static Logger logger = LogManager.getLogger(SpMySQL.class);
+	
+	public SpMySQL()
 	{
+		
+	}
+	
+	@Override
+	public void insertSubMessage(SubMessage subMsg) 
+	{
+		EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+		EntityTransaction et = null;
+		
 		try 
 		{
-			logger.debug("\n Se procede a configurar la Base de Datos...");
-            Class.forName("com.mysql.jdbc.Driver");
-        } 
-		catch (ClassNotFoundException ex) 
-		{
-        	logger.error("Error al registrar el driver de MySQL: " + ex);
-        }
-	}
-	
-	@Override
-	public void insertSubMessage(SubMessage_Dto subMsg) 
-	{	
-		try(Connection conn = DriverManager.getConnection(confDB.getUrlDB(), confDB.getUserDB(), confDB.getPassDB()))
-		{
-			Statement stmt = conn.createStatement();
-            stmt.executeUpdate(messageInsert(subMsg));
-            
-            logger.info("Se ha registrado el msg: " + subMsg.getIdMessage() + " en la tabla: Tbl_SubMessage");
-            
-            conn.close();
+			logger.info("Se procede a guardar en la tabla Tbl_SubMessage el mensaje: " + subMsg.getIdMessage());
+			
+			et = em.getTransaction();
+			et.begin();
+			
+			em.persist(subMsg);
+			et.commit();
 		}
-		catch(SQLException e)
+		catch(Exception e)
 		{
-			logger.error("No se pudo guardar el msg: " + subMsg.getIdMessage() + " en la tabla: Tbl_SubMessage");
-			logger.error(e);
+			if(et != null)
+				et.rollback();
+			logger.error("Error al guardar ne la tabla Tbl_SubMessage el mensaje: " + subMsg.getIdMessage());
+			e.printStackTrace();
+		}
+		finally
+		{
+			em.close();
 		}
 	}
 
 	@Override
-	public void insertDevMeasure(DeviceMeasurement_Dto devMeasur) 
+	public void insertDevMeasure(DeviceMeasurement devMeasur)
 	{
-		try(Connection conn = DriverManager.getConnection(confDB.getUrlDB(), confDB.getUserDB(), confDB.getPassDB()))
+		EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+		EntityTransaction et = null;
+		
+		try 
 		{
-			Statement stmt = conn.createStatement();
-            stmt.executeUpdate(measurementInsert(devMeasur));
-            
-            logger.info("Se ha registrado la medicion: " + devMeasur.getIdMeasurement() + " en la tabla: Tbl_DeviceMeasurement");
-            
-            conn.close();
+			logger.info("Se procede a guardar en la tabla Tbl_DeviceMeasurement la medicion: " + devMeasur.getId());
+			
+			et = em.getTransaction();
+			et.begin();
+			
+			em.persist(devMeasur);
+			et.commit();
 		}
-		catch(SQLException e)
+		catch(Exception e)
 		{
-			logger.error("No se pudo guardar la medicion: " + devMeasur.getIdMeasurement() + " en la tabla: Tbl_DeviceMeasurement");
-			logger.error(e);
+			if(et != null)
+				et.rollback();
+			
+			logger.info("Error al guardar en la tabla Tbl_DeviceMeasurement la medicion: " + devMeasur.getId());
+			e.printStackTrace();
 		}
-	}
-	
-	private String measurementInsert (DeviceMeasurement_Dto measure) 
-	{
-		SimpleDateFormat dateFormat = new SimpleDateFormat("YYYYMMDDHHMMSS");
-		
-		String query = "INSERT INTO Tbl_DeviceMeasurement \n"
-				+ "VALUES ( \n"
-				+ measure.getIdDev() + ", \n"
-				+ dateFormat.format(measure.getTimeMeasure()) + ", \n"
-				+ measure.getPotency() + ", \n"
-				+ measure.getVoltage() + ", \n"
-				+ measure.getCharge() + ", \n"
-				+ measure.getTemperature() + ", \n"
-				+ measure.getMisc01() + ", \n"
-				+ measure.getMisc02() + ", \n"
-				+ measure.getMisc03() + ", \n"
-				+ measure.getMisc04() + ", \n"
-				+ measure.getMisc05() + ", \n"
-				+ measure.getMisc06() + ", \n"
-				+ measure.getMisc07() + ", \n"
-				+ measure.getMisc08() + ", \n"
-				+ measure.getMisc09() + ", \n"
-				+ measure.getMisc10() + ", \n"
-				+ measure.getMisc11() + ", \n"
-				+ measure.getMisc12() + ", \n"
-				+ measure.getMisc13() + ", \n"
-				+ measure.getMisc14() + ", \n"
-				+ measure.getMisc15() + ", \n"
-				+ measure.getMisc16() + ", \n"
-				+ measure.getMisc17() + ", \n"
-				+ measure.getMisc18() + ", \n"
-				+ measure.getMisc19() + ", \n"
-				+ measure.getMisc20() + " \n"
-				+ ");";
-		
-		System.out.print(query);
-		
-		return query;
+		finally
+		{
+			em.close();
+		}
 	}
 
-	private String messageInsert(SubMessage_Dto message) 
+	@Override
+	public void closeDB() 
 	{
-		String date = new Timestamp(System.currentTimeMillis()).toString();
-		
-		String query = "INSERT INTO Tbl_SubMessage \n"
-				+ "VALUES ( \n"
-				+ message.getIdDev() + ", \n"
-				+ message.getIdMessage() + ", \n"
-				+ message.getReceivedTime() + ", \n"
-				+ date + ", \n"
-				+ message.getTopic() + ", \n"
-				+ message.getMessage() + ", \n"
-				+ ")";
-		return query;
+		ENTITY_MANAGER_FACTORY.close();
 	}
 }

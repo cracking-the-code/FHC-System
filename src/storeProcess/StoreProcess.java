@@ -10,10 +10,10 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import com.google.gson.Gson;
 
-import dataLayer.DeviceMeasurement_Dto;
+import dataLayer.DeviceMeasurement;
 import dataLayer.SpDataBaseI;
 import dataLayer.SpMySQL;
-import dataLayer.SubMessage_Dto;
+import dataLayer.SubMessage;
 
 public class StoreProcess implements SpInterface 
 {
@@ -42,8 +42,8 @@ public class StoreProcess implements SpInterface
 			JsonMonitoring jsonMessage = gson.fromJson(payload, JsonMonitoring.class);
 			
 			
-			DeviceMeasurement_Dto measure = deserializeMeasure(jsonMessage);
-			SubMessage_Dto subMessage = deserializeSubMessage(jsonMessage,payload);
+			DeviceMeasurement measure = deserializeMeasure(jsonMessage);
+			SubMessage subMessage = deserializeSubMessage(jsonMessage,payload);
 			
 			
 			db.insertDevMeasure(measure);
@@ -55,9 +55,9 @@ public class StoreProcess implements SpInterface
 		}
 	}
 	
-	private DeviceMeasurement_Dto deserializeMeasure(JsonMonitoring json) 
+	private DeviceMeasurement deserializeMeasure(JsonMonitoring json) 
 	{
-		DeviceMeasurement_Dto measure = new DeviceMeasurement_Dto();
+		DeviceMeasurement measure = new DeviceMeasurement();
 		
 		try 
 		{
@@ -100,9 +100,9 @@ public class StoreProcess implements SpInterface
 		return measure;
 	}
 
-	private SubMessage_Dto deserializeSubMessage(JsonMonitoring json, String message) 
+	private SubMessage deserializeSubMessage(JsonMonitoring json, String message) 
 	{
-		SubMessage_Dto subMessage = new SubMessage_Dto();
+		SubMessage subMessage = new SubMessage();
 		
 		try 
 		{
