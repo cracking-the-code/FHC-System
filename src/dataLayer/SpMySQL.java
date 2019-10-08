@@ -1,5 +1,7 @@
 package dataLayer;
 
+import java.sql.Timestamp;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -31,7 +33,8 @@ public class SpMySQL implements SpDataBaseI
 		try 
 		{
 			logger.info("Se procede a guardar en la tabla Tbl_SubMessage el mensaje: " + subMsg.getIdMessage());
-			
+			Timestamp time = new Timestamp(System.currentTimeMillis());
+			subMsg.setProcessedTime(time);
 			et = em.getTransaction();
 			et.begin();
 			

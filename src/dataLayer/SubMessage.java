@@ -11,8 +11,6 @@ import javax.persistence.Table;
 @Table(name = "Tbl_SubMessage")
 public class SubMessage
 {
-	private static final long serialVersionUID = 1L;
-	
 	@Id
 	@Column(name = "IdDev", unique = true)
 	private String idDev;

@@ -1,5 +1,8 @@
 package main;
 
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+
 import storeProcess.SpManager;
 import storeProcess.SpManagerInterface;
 
