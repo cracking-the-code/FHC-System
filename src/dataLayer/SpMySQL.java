@@ -14,14 +14,16 @@ import storeProcess.StoreProcess;
 
 public class SpMySQL implements SpDataBaseI
 {
-	private static final EntityManagerFactory ENTITY_MANAGER_FACTORY = Persistence
-            .createEntityManagerFactory("FHC_System");
+	private static EntityManagerFactory ENTITY_MANAGER_FACTORY;
 	
 	private static Logger logger = LogManager.getLogger(SpMySQL.class);
 	
 	public SpMySQL()
 	{
+		logger.info("Data Base Connection initializing...");
 		
+		ENTITY_MANAGER_FACTORY = Persistence
+	            .createEntityManagerFactory("FHC_System");
 	}
 	
 	@Override
@@ -32,9 +34,10 @@ public class SpMySQL implements SpDataBaseI
 		
 		try 
 		{
-			logger.info("Se procede a guardar en la tabla Tbl_SubMessage el mensaje: " + subMsg.getIdMessage());
+			logger.info("The message: " + subMsg.getIdMessage() + " will be stored in Tbl_SubMessage");
 			Timestamp time = new Timestamp(System.currentTimeMillis());
 			subMsg.setProcessedTime(time);
+			
 			et = em.getTransaction();
 			et.begin();
 			
@@ -45,8 +48,12 @@ public class SpMySQL implements SpDataBaseI
 		{
 			if(et != null)
 				et.rollback();
-			logger.error("Error al guardar ne la tabla Tbl_SubMessage el mensaje: " + subMsg.getIdMessage());
-			e.printStackTrace();
+			
+			logger.error("Cannot save in table Tbl_SubMessage the message: " + subMsg.getIdMessage());
+			logger.error("\nmsg " + e.getMessage() + 
+						 "\nloc " + e.getLocalizedMessage() + 
+						 "\ncause " + e.getCause() + 
+						 "\nexcep " + e);
 		}
 		finally
 		{
@@ -62,7 +69,7 @@ public class SpMySQL implements SpDataBaseI
 		
 		try 
 		{
-			logger.info("Se procede a guardar en la tabla Tbl_DeviceMeasurement la medicion: " + devMeasur.getId());
+			logger.info("The measurement: " + devMeasur.getId() + " Will be stored in Tbl_DeviceMeasurement");
 			
 			et = em.getTransaction();
 			et.begin();
@@ -75,8 +82,11 @@ public class SpMySQL implements SpDataBaseI
 			if(et != null)
 				et.rollback();
 			
-			logger.info("Error al guardar en la tabla Tbl_DeviceMeasurement la medicion: " + devMeasur.getId());
-			e.printStackTrace();
+			logger.info("Cannot save in table Tbl_DeviceMeasurement the measurement: " + devMeasur.getId());
+			logger.error("\nmsg " + e.getMessage() + 
+					 	 "\nloc " + e.getLocalizedMessage() + 
+					 	 "\ncause " + e.getCause() + 
+					 	 "\nexcep " + e);
 		}
 		finally
 		{
@@ -85,8 +95,75 @@ public class SpMySQL implements SpDataBaseI
 	}
 
 	@Override
+	public void insertDevMqttInf(DeviceMqttInfo devMqtt)
+	{
+		EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+		EntityTransaction et = null;
+		
+		try 
+		{
+			logger.info("The info: " + devMqtt.getIdDev() + " will be stored in Tbl_DeviceMqttInf");
+			
+			et = em.getTransaction();
+			et.begin();
+			
+			em.persist(devMqtt);
+			et.commit();
+		}
+		catch(Exception e)
+		{
+			if(et != null)
+				et.rollback();
+			
+			logger.info("Cannot save in table Tbl_DeviceMqttInf the info: " + devMqtt.getIdDev());
+			logger.error("\nmsg " + e.getMessage() + 
+						 "\nloc " + e.getLocalizedMessage() + 
+						 "\ncause " + e.getCause() + 
+						 "\nexcep " + e);
+		}
+		finally
+		{
+			em.close();
+		}
+	}
+
+	@Override
+	public void insertDevConfig(DeviceConfig devConf)
+	{
+		EntityManager em = ENTITY_MANAGER_FACTORY.createEntityManager();
+		EntityTransaction et = null;
+		
+		try 
+		{
+			logger.info("The configuration: " + devConf.getIdDev() + " will be stored in Tbl_DeviceConfig");
+			
+			et = em.getTransaction();
+			et.begin();
+			
+			em.persist(devConf);
+			et.commit();
+		}
+		catch(Exception e)
+		{
+			if(et != null)
+				et.rollback();
+			
+			logger.info("Cannot save in table Tbl_DeviceConfig the configuration: " + devConf.getIdDev());
+			logger.error("\nmsg " + e.getMessage() + 
+					 	 "\nloc " + e.getLocalizedMessage() + 
+					 	 "\ncause " + e.getCause() + 
+					 	 "\nexcep " + e);
+		}
+		finally
+		{
+			em.close();
+		}
+	}
+	
+	@Override
 	public void closeDB() 
 	{
+		logger.info("Closing Data Base Connection...");
 		ENTITY_MANAGER_FACTORY.close();
 	}
 }

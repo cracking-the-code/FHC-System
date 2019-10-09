@@ -10,9 +10,10 @@ public class MainProcess {
 
 	public static void main(String[] args)
 	{
-		SpManagerInterface sp = new SpManager();
+		SpManagerInterface spMonitor = new SpManager();
+		SpManagerInterface spConfigu = new SpManager();
 		
-		sp.setConnections(5);
-		sp.startSub();
+		spMonitor.setConnections(5);
+		spMonitor.startSub();
 	}
 }

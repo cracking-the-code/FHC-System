@@ -11,7 +11,7 @@ public class ConfigDB
 {
 	private static ConfigDB uniqueInstance;
 	private Properties prop;
-	private String configPath = "/home/echeverri/Projects/FHC-System/resources/dataBase.properties";
+	private String configPath = "/home/pi/Desktop/FHCSystem/conf/dataBase.properties";
 	private static Logger logger = LogManager.getLogger(ConfigDB.class);
 	
 	private String urlDB;

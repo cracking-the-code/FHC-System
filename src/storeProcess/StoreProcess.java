@@ -38,7 +38,8 @@ public class StoreProcess implements SpInterface
 		{
 			String payload = new String(msg.getPayload());	
 			Gson gson = new Gson();
-			 System.out.println(payload);
+			System.out.println(payload);
+			
 			JsonMonitoring jsonMessage = gson.fromJson(payload, JsonMonitoring.class);
 			
 			

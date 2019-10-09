@@ -11,7 +11,7 @@ public class ConfigClass
 {
 	private static ConfigClass uniqueInstance;
 	private Properties prop;
-	private String configPath = "/home/echeverri/Projects/FHC-System/resources/config.properties";
+	private String configPath = "/home/pi/Desktop/FHCSystem/conf/config.properties";
 	private static Logger logger = LogManager.getLogger(ConfigClass.class);
 	
 	private String serverURI;
@@ -19,7 +19,9 @@ public class ConfigClass
 	private String userName;
 	private String password;
 	private int qos;
-	private String topic;
+	private String monitorTopic;
+	private String getConfTopic;
+	private String setConfTopic;
 	
 	private ConfigClass() throws Exception
 	{
@@ -39,7 +41,9 @@ public class ConfigClass
 			this.userName = prop.getProperty("userName");
 			this.password = prop.getProperty("password");
 			this.qos = Integer.parseInt(prop.getProperty("qos"));
-			this.topic = prop.getProperty("topic");
+			this.monitorTopic = prop.getProperty("MonitorTopic");
+			this.getConfTopic = prop.getProperty("getConfTopic");
+			this.setConfTopic = prop.getProperty("setConfTopic");
 			
 			logger.info("Configuracion Exitosa!!!");
 		}
@@ -88,7 +92,15 @@ public class ConfigClass
 		return qos;
 	}
 	
-	public String getTopic() {
-		return topic;
+	public String getMonitorTopic() {
+		return monitorTopic;
+	}
+	
+	public String getGetConfTopic() {
+		return getConfTopic;
+	}
+	
+	public String getSetConfTopic() {
+		return setConfTopic;
 	}
 }

@@ -70,7 +70,7 @@ public class SpManager implements SpManagerInterface
 			
 			client.connect(connOpts);
 			client.setCallback(getCallback());
-			client.subscribe(conf.getTopic());
+			client.subscribe(conf.getMonitorTopic());
 			
 			logger.info("Coneccion Exitosa!!!");
 		}
