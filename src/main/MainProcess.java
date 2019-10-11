@@ -5,15 +5,25 @@ import javax.persistence.Persistence;
 
 import storeProcess.SpManager;
 import storeProcess.SpManagerInterface;
+import storeProcess.StoreConfig;
+import storeProcess.StoreProcess;
 
 public class MainProcess {
 
 	public static void main(String[] args)
 	{
-		SpManagerInterface spMonitor = new SpManager();
-		SpManagerInterface spConfigu = new SpManager();
+		StoreProcess storeP = new StoreProcess();
+		StoreConfig storeC = new StoreConfig();
+		
+		SpManagerInterface spMonitor = new SpManager(storeP);
+		SpManagerInterface spConfigu = new SpManager(storeC);
 		
 		spMonitor.setConnections(5);
+		spMonitor.setTopic("");
 		spMonitor.startSub();
+		
+		spConfigu.setConnections(1);
+		spMonitor.setTopic("");
+		spConfigu.startSub();
 	}
 }

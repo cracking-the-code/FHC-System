@@ -32,21 +32,21 @@ public class StoreProcess implements SpInterface
 	@Override
 	public void storeMessage(MqttMessage msg) 
 	{
-		logger.info("Se almacenara Mensaje en DB");
+		logger.info("Begins a Store Process");
 		
 		try 
 		{
 			String payload = new String(msg.getPayload());	
 			Gson gson = new Gson();
-			System.out.println(payload);
-			
+
+			logger.info("Begins the json deserialization");
 			JsonMonitoring jsonMessage = gson.fromJson(payload, JsonMonitoring.class);
 			
-			
+			logger.info("Begins the object deserialization");
 			DeviceMeasurement measure = deserializeMeasure(jsonMessage);
 			SubMessage subMessage = deserializeSubMessage(jsonMessage,payload);
 			
-			
+			logger.info("Begins the persistence in database");
 			db.insertDevMeasure(measure);
 			db.insertSubMessage(subMessage);
 		}

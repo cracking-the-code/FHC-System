@@ -20,22 +20,24 @@ public class SpManager implements SpManagerInterface
 	private ConfigClass conf = ConfigClass.getInstance();
 	
 	private int connections;
+	private String topic;
 	
 	private MqttClient client;
 	private MqttConnectOptions connOpts;
 	private MemoryPersistence persistence;
 	
-	//La generacion de estas clases dependera del algoritmo
-	private StoreProcess sp = new StoreProcess();
+	private SpInterface sp;
 	
-	public SpManager() 
+	public SpManager(SpInterface sp) 
 	{
 		configureMqtt();
+		this.sp = sp;
 	}
 	
-	public SpManager(int connections) 
+	public SpManager(SpInterface sp, int connections) 
 	{
 		configureMqtt();
+		this.sp = sp;
 		this.connections = connections;
 	}
 	
@@ -43,7 +45,7 @@ public class SpManager implements SpManagerInterface
 	{
 		try 
 		{
-			logger.info("Se procede a configurar el cliente Mqtt");
+			logger.info("Starting the Mqtt Configuration...");
 			
 			client = new MqttClient(conf.getServerURI(), conf.getClientID(), persistence);
 			connOpts = new MqttConnectOptions();
@@ -52,11 +54,11 @@ public class SpManager implements SpManagerInterface
 			connOpts.setUserName(conf.getUserName());
 			connOpts.setPassword(conf.getPassword().toCharArray());
 			
-			logger.info("Se ha configurado el cliente correctamente!!!");
+			logger.info("The Mqtt protocol has been configured successfully!!!");
 		} 
 		catch (Exception e) 
 		{
-			logger.error("Ha sucedido un error en la configuracion Mqtt ");
+			logger.error("An error has happened during Mqtt configuration");
 			logger.error(e);
 		}
 	}
@@ -66,18 +68,18 @@ public class SpManager implements SpManagerInterface
 	{
 		try
 		{
-			logger.info("Conectando al servidor: " + conf.getServerURI());
+			logger.info("Conecting to the Mqtt Server: " + conf.getServerURI() + "...");
 			
 			client.connect(connOpts);
 			client.setCallback(getCallback());
-			client.subscribe(conf.getMonitorTopic());
+			client.subscribe(this.topic);
 			
-			logger.info("Coneccion Exitosa!!!");
+			logger.info("Successful subscription to topic: " + this.topic);
 		}
 		catch(Exception me)
 		{
 
-			logger.error("Un Error ha sucedido: " + me.toString());
+			logger.error("An error has happened: " + me.toString());
 			logger.error("\nmsg " + me.getMessage() + 
 						"\nloc " + me.getLocalizedMessage() + 
 						"\ncause " + me.getCause() + 
@@ -103,10 +105,10 @@ public class SpManager implements SpManagerInterface
 				sp.storeMessage(message);
 				
                 logger.info("\nMensaje Recibido" +
-                        "\n\tTime:    " + time + 
-                        "\n\tTopic:   " + topic + 
-                        "\n\tMessage: " + new String(message.getPayload()) + 
-                        "\n\tQoS:     " + message.getQos() + "\n");
+                        	"\n\tTime:    " + time + 
+                        	"\n\tTopic:   " + topic + 
+                        	"\n\tMessage: " + new String(message.getPayload()) + 
+                        	"\n\tQoS:     " + message.getQos() + "\n");
 			}
 			
 			@Override
@@ -133,11 +135,11 @@ public class SpManager implements SpManagerInterface
 		try 
 		{
 			client.close();
-			logger.info("Se hace cerrado la conexion Mqtt Exitosamente!!!");
+			logger.info("The connection has been closed successfully!!!");
 		} 
 		catch (MqttException e) 
 		{
-			logger.error("Error en el cerrado de la conexion Mqtt");
+			logger.error("An Error ocurred related to closing connection");
 			logger.error("Error: " + e.getMessage());
 		}
 	}
@@ -146,4 +148,9 @@ public class SpManager implements SpManagerInterface
 	public void setConnections(int conn) { this.connections = conn; }
 	@Override
 	public int getConnections() { return this.connections; }
+
+	@Override
+	public void setTopic(String topic) { this.topic = topic; }
+	@Override
+	public String getTopic() { return this.topic; }
 }
