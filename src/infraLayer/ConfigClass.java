@@ -11,7 +11,7 @@ public class ConfigClass
 {
 	private static ConfigClass uniqueInstance;
 	private Properties prop;
-	private String configPath = "/home/pi/Desktop/FHCSystem/conf/config.properties";
+	private String configPath = "../resources/config.properties";
 	private static Logger logger = LogManager.getLogger(ConfigClass.class);
 	
 	private String serverURI;

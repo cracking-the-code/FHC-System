@@ -3,6 +3,7 @@ package main;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import infraLayer.ConfigClass;
 import storeProcess.SpManager;
 import storeProcess.SpManagerInterface;
 import storeProcess.StoreConfig;
@@ -12,6 +13,8 @@ public class MainProcess {
 
 	public static void main(String[] args)
 	{
+		ConfigClass conf = ConfigClass.getInstance();
+		
 		StoreProcess storeP = new StoreProcess();
 		StoreConfig storeC = new StoreConfig();
 		
@@ -19,11 +22,11 @@ public class MainProcess {
 		SpManagerInterface spConfigu = new SpManager(storeC);
 		
 		spMonitor.setConnections(5);
-		spMonitor.setTopic("");
+		System.out.print(conf.getMonitorTopic().toString());
 		spMonitor.startSub();
 		
 		spConfigu.setConnections(1);
-		spMonitor.setTopic("");
+		spConfigu.setTopic(conf.getGetConfTopic());
 		spConfigu.startSub();
 	}
 }
