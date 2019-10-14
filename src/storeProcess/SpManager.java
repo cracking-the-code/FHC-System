@@ -112,10 +112,7 @@ public class SpManager implements SpManagerInterface
 			{
 				Timestamp time = new Timestamp(System.currentTimeMillis());
 				
-				logger.info("\nMensaje Recibido");
-				storeFactoryProcess.setTime(time);
-				
-				storeFactoryProcess.messageArrived(topic, message);
+				storeFactoryProcess.messageArrived(topic, message, time);
 				pool.execute(storeFactoryProcess);
 				
                 logger.info("\nMensaje Recibido" +

@@ -17,30 +17,22 @@ public class StoreFactory implements Runnable
 		
 	}
 	
-	public void setTime(Timestamp time) { this.time = time; }
-	
 	@Override
 	public void run()
 	{
 		//This is the factory
 		sp = spFactory(this.topic);
-	
-		try {
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		
 		sp.setReceivedMessage(this.time);
 		sp.setTopic(this.topic);
 		sp.storeMessage(this.message);
 	}
 	
-	public void messageArrived(String topic, MqttMessage message)
+	public void messageArrived(String topic, MqttMessage message, Timestamp time)
 	{
 		this.topic = topic;
 		this.message = message;
+		this.time = time;
 	}
 	
 	private SpInterface spFactory(String topic)

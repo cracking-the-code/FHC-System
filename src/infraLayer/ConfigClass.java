@@ -24,6 +24,7 @@ public class ConfigClass
 	private String monitorTopic;
 	private String getConfTopic;
 	private String setConfTopic;
+	private int spConnections;
 	
 	private ConfigClass() throws Exception
 	{
@@ -45,6 +46,7 @@ public class ConfigClass
 			this.monitorTopic = prop.getProperty("MonitorTopic");
 			this.getConfTopic = prop.getProperty("getConfTopic");
 			this.setConfTopic = prop.getProperty("setConfTopic");
+			this.spConnections = Integer.parseInt(prop.getProperty("spConnections"));
 			
 			logger.info("Successful COnfiguration!!!");
 		}
@@ -103,5 +105,9 @@ public class ConfigClass
 	
 	public String getSetConfTopic() {
 		return setConfTopic;
+	}
+
+	public int getSpConnections() {
+		return spConnections;
 	}
 }
