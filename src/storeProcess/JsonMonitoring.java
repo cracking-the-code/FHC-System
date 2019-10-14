@@ -1,5 +1,7 @@
 package storeProcess;
 
+import com.google.gson.annotations.Expose;
+
 public class JsonMonitoring
 {
     private String Id;

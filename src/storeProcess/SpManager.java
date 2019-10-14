@@ -1,12 +1,15 @@
 package storeProcess;
 
 import java.sql.Timestamp;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.IMqttToken;
+import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -22,22 +25,24 @@ public class SpManager implements SpManagerInterface
 	private int connections;
 	private String topic;
 	
-	private MqttClient client;
+	private MqttAsyncClient client;
 	private MqttConnectOptions connOpts;
 	private MemoryPersistence persistence;
 	
-	private SpInterface sp;
+	private ExecutorService pool;
+	private StoreFactory storeFactoryProcess;
 	
-	public SpManager(SpInterface sp) 
+	public SpManager(int connections) 
 	{
+		this.connections = connections;
+		pool = Executors.newFixedThreadPool(connections);
+		storeFactoryProcess = new StoreFactory();
 		configureMqtt();
-		this.sp = sp;
 	}
 	
 	public SpManager(SpInterface sp, int connections) 
 	{
 		configureMqtt();
-		this.sp = sp;
 		this.connections = connections;
 	}
 	
@@ -47,12 +52,15 @@ public class SpManager implements SpManagerInterface
 		{
 			logger.info("Starting the Mqtt Configuration...");
 			
-			client = new MqttClient(conf.getServerURI(), conf.getClientID(), persistence);
+			client = new MqttAsyncClient(conf.getServerURI(), conf.getClientID(), persistence);
 			connOpts = new MqttConnectOptions();
 			
 			connOpts.setCleanSession(true);
 			connOpts.setUserName(conf.getUserName());
 			connOpts.setPassword(conf.getPassword().toCharArray());
+			connOpts.setAutomaticReconnect(true);
+			//Setting the callback to accept the messages as soon as the client is connected
+			client.setCallback(getCallback());
 			
 			logger.info("The Mqtt protocol has been configured successfully!!!");
 		} 
@@ -60,6 +68,7 @@ public class SpManager implements SpManagerInterface
 		{
 			logger.error("An error has happened during Mqtt configuration");
 			logger.error(e);
+			e.printStackTrace();
 		}
 	}
 	
@@ -68,13 +77,20 @@ public class SpManager implements SpManagerInterface
 	{
 		try
 		{
-			logger.info("Conecting to the Mqtt Server: " + conf.getServerURI() + "...");
+			logger.info("Conecting to: " + conf.getServerURI() + " Mqtt Server");
+			IMqttToken token = client.connect(connOpts);
 			
-			client.connect(connOpts);
-			client.setCallback(getCallback());
-			client.subscribe(this.topic);
+			token.waitForCompletion();
+			logger.info("Connected to the: " + conf.getServerURI() + " Mqtt Server");
+						
+			logger.info("Subscribe to the Topic: " + this.topic);
+
 			
-			logger.info("Successful subscription to topic: " + this.topic);
+			client.subscribe("home/Monitoreo/#",0,null,new MqttActionHandler());
+			client.subscribe("home/GetConfiguracion/#",0,null,new MqttActionHandler());
+			
+			
+			logger.info("Sucsubscription to topic: " + this.topic); 
 		}
 		catch(Exception me)
 		{
@@ -89,20 +105,18 @@ public class SpManager implements SpManagerInterface
 	
 	private MqttCallback getCallback() 
 	{
-		return new MqttCallback() {
-			
+		return new MqttCallback()
+		{
 			@Override
 			public void messageArrived(String topic, MqttMessage message) throws Exception
 			{
-				/*==================================================================
-				 * ES AQUI DONDE VIENE EL ALGORITMO DE BALANCEO DE CARGA
-				 * PERO EN LO QUE SE APLICA HACEMOS ESTO...
-				 ===================================================================*/
 				Timestamp time = new Timestamp(System.currentTimeMillis());
-								
-				sp.setReceivedMessage(time);
-				sp.setTopic(topic);
-				sp.storeMessage(message);
+				
+				logger.info("\nMensaje Recibido");
+				storeFactoryProcess.setTime(time);
+				
+				storeFactoryProcess.messageArrived(topic, message);
+				pool.execute(storeFactoryProcess);
 				
                 logger.info("\nMensaje Recibido" +
                         	"\n\tTime:    " + time + 
@@ -128,7 +142,7 @@ public class SpManager implements SpManagerInterface
 			public void connectionLost(Throwable token) { }
 		};
 	}
-
+	
 	@Override
 	public void stopSub() 
 	{
@@ -148,9 +162,4 @@ public class SpManager implements SpManagerInterface
 	public void setConnections(int conn) { this.connections = conn; }
 	@Override
 	public int getConnections() { return this.connections; }
-
-	@Override
-	public void setTopic(String topic) { this.topic = topic; }
-	@Override
-	public String getTopic() { return this.topic; }
 }

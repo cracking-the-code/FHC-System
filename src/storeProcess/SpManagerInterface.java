@@ -6,6 +6,4 @@ public interface SpManagerInterface
 	void stopSub();
 	void setConnections(int conn);
 	int getConnections();
-	void setTopic(String topic);
-	String getTopic();
 }

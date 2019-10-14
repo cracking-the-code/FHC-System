@@ -10,7 +10,6 @@ import javax.persistence.Persistence;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import storeProcess.StoreProcess;
 
 public class SpMySQL implements SpDataBaseI
 {
@@ -20,7 +19,7 @@ public class SpMySQL implements SpDataBaseI
 	
 	public SpMySQL()
 	{
-		logger.info("Data Base Connection initializing...");
+		logger.info("initializing Data Base Connection...");
 		
 		ENTITY_MANAGER_FACTORY = Persistence
 	            .createEntityManagerFactory("FHC_System");

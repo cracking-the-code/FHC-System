@@ -7,6 +7,8 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 import dataLayer.DeviceConfig;
 import dataLayer.DeviceMeasurement;
@@ -16,7 +18,7 @@ import dataLayer.SubMessage;
 
 public class StoreConfig implements SpInterface
 {
-private static Logger logger = LogManager.getLogger(StoreConfig.class);
+	private static Logger logger = LogManager.getLogger(StoreConfig.class);
 	
 	private String topic;
 	private Date receivedTime;
@@ -31,21 +33,22 @@ private static Logger logger = LogManager.getLogger(StoreConfig.class);
 	@Override
 	public void storeMessage(MqttMessage msg)
 	{
-		logger.info("Se almacenara Mensaje en DB");
+		logger.info("Beginning the Store Configuration");
 		
 		try 
 		{
 			String payload = new String(msg.getPayload());	
 			Gson gson = new Gson();
-			System.out.println(payload);
+			JsonElement jsonElement = new JsonParser().parse(payload);
 			
-			JsonMonitoring jsonMessage = gson.fromJson(payload, JsonMonitoring.class);
-			JsonGetConfiguration jsonConfig = gson.fromJson(payload, JsonGetConfiguration.class);
+			logger.info("Begins the json deserialization");
+			JsonGetConfiguration jsonMessage = gson.fromJson(jsonElement, JsonGetConfiguration.class);
 			
-			DeviceConfig devConf = deserializeDevConfig(jsonConfig);
-			SubMessage subMessage = deserializeSubMessage(jsonMessage,payload);
+			logger.info("Begins the object deserialization");
+			DeviceConfig devConf = deserializeDevConfig(jsonMessage);
+			SubMessage subMessage = deserializeSubMessage(jsonMessage, payload);
 			
-			
+			logger.info("Begins the persistence in database");
 			db.insertDevConfig(devConf);
 			db.insertSubMessage(subMessage);
 		}
@@ -100,21 +103,21 @@ private static Logger logger = LogManager.getLogger(StoreConfig.class);
 		return devConf;
 	}
 	
-	private SubMessage deserializeSubMessage(JsonMonitoring json, String message) 
+	private SubMessage deserializeSubMessage(JsonGetConfiguration json, String message) 
 	{
 		SubMessage subMessage = new SubMessage();
 		
 		try 
 		{
-			subMessage.setIdDev(json.getId());
-			subMessage.setIdMessage(json.getDate());
+			subMessage.setIdDev(Integer.toString(json.getId()));
+			subMessage.setIdMessage(Integer.toString(json.getId()));
 			subMessage.setReceivedTime(receivedTime);
 			subMessage.setTopic(topic);
 			subMessage.setMessage(message);
 		}
 		catch(Exception e)
 		{
-			logger.error("An error happened during deserialization: " + json.getDate());
+			logger.error("An error happened during deserialization: " + Integer.toString(json.getId()));
 			logger.error(e.getMessage());
 		}
 		

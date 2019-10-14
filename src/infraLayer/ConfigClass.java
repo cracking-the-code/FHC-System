@@ -1,6 +1,8 @@
 package infraLayer;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
@@ -11,7 +13,7 @@ public class ConfigClass
 {
 	private static ConfigClass uniqueInstance;
 	private Properties prop;
-	private String configPath = "../resources/config.properties";
+	private Path configPath = Paths.get("resources","config.properties");
 	private static Logger logger = LogManager.getLogger(ConfigClass.class);
 	
 	private String serverURI;
@@ -25,14 +27,13 @@ public class ConfigClass
 	
 	private ConfigClass() throws Exception
 	{
-		prop = new Properties();
-		
-		try(InputStream input = new FileInputStream(configPath)) 
+		logger.info("Starting the General Configuration...");
+		try(InputStream input = new FileInputStream(configPath.toAbsolutePath().toString())) 
 		{
 			prop = new Properties();
 			
 			if(input == null)
-				throw new Exception("Missing Configuration File for: " + configPath);
+				throw new Exception("Missing Configuration File for: " + configPath.toAbsolutePath().toString());
 			
 			prop.load(input);
 			
@@ -45,7 +46,7 @@ public class ConfigClass
 			this.getConfTopic = prop.getProperty("getConfTopic");
 			this.setConfTopic = prop.getProperty("setConfTopic");
 			
-			logger.info("Configuracion Exitosa!!!");
+			logger.info("Successful COnfiguration!!!");
 		}
 		catch(Exception e)
 		{

@@ -9,13 +9,15 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 import dataLayer.DeviceMeasurement;
 import dataLayer.SpDataBaseI;
 import dataLayer.SpMySQL;
 import dataLayer.SubMessage;
 
-public class StoreProcess implements SpInterface 
+public class StoreProcess implements SpInterface
 {
 	private static Logger logger = LogManager.getLogger(StoreProcess.class);
 	
@@ -32,15 +34,16 @@ public class StoreProcess implements SpInterface
 	@Override
 	public void storeMessage(MqttMessage msg) 
 	{
-		logger.info("Begins a Store Process");
+		logger.info("Beginning the Store Process");
 		
 		try 
 		{
 			String payload = new String(msg.getPayload());	
 			Gson gson = new Gson();
-
+			JsonElement jsonElement = new JsonParser().parse(payload);
+			
 			logger.info("Begins the json deserialization");
-			JsonMonitoring jsonMessage = gson.fromJson(payload, JsonMonitoring.class);
+			JsonMonitoring jsonMessage = gson.fromJson(jsonElement, JsonMonitoring.class);
 			
 			logger.info("Begins the object deserialization");
 			DeviceMeasurement measure = deserializeMeasure(jsonMessage);
@@ -53,6 +56,7 @@ public class StoreProcess implements SpInterface
 		catch(Exception e)
 		{
 			logger.error(e);
+			e.printStackTrace();
 		}
 	}
 	
@@ -71,7 +75,7 @@ public class StoreProcess implements SpInterface
 			measure.setVoltage(json.getMeasure().getVoltage());
 			measure.setCharge(json.getMeasure().getCurrent());
 			measure.setTemperature(json.getMeasure().getTemp());
-			measure.setMisc01(json.getMeasure().getMisc01());
+			measure.setMisc01(json.getMeasure().getHumidity());
 			measure.setMisc02(json.getMeasure().getMisc02());
 			measure.setMisc03(json.getMeasure().getMisc03());
 			measure.setMisc04(json.getMeasure().getMisc04());
