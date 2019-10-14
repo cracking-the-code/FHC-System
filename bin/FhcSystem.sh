@@ -1,6 +1,6 @@
 #!/bin/sh
 SERVICE_NAME=FhcSystemService
-PATH_TO_JAR=../src/Main.jar
+PATH_TO_JAR=FHC_System.jar
 PID_PATH_NAME=/tmp/FhcSystemService-pid
 
 # Colors :3
