@@ -10,14 +10,31 @@ import javax.persistence.Persistence;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import infraLayer.ConfigDB;
+
 
 public class SpMySQL implements SpDataBaseI
 {
+	private static SpMySQL uniqueInstance;
 	private static EntityManagerFactory ENTITY_MANAGER_FACTORY;
-	
 	private static Logger logger = LogManager.getLogger(SpMySQL.class);
 	
-	public SpMySQL()
+	public static synchronized SpMySQL getInstance() {
+		if(uniqueInstance == null)
+		{
+			try 
+			{
+				uniqueInstance = new SpMySQL();
+			} 
+			catch (Exception e) 
+			{
+				logger.error(e.getMessage());
+			}
+		}
+		return uniqueInstance;
+	}
+	
+	private SpMySQL()
 	{
 		logger.info("initializing Data Base Connection...");
 		

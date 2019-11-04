@@ -1,6 +1,7 @@
 package storeProcess;
 
 import java.sql.Timestamp;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -52,7 +53,8 @@ public class SpManager implements SpManagerInterface
 		{
 			logger.info("Starting the Mqtt Configuration...");
 			
-			client = new MqttAsyncClient(conf.getServerURI(), conf.getClientID(), persistence);
+			String clientId = UUID.randomUUID().toString();
+			client = new MqttAsyncClient(conf.getServerURI(), clientId, persistence);
 			connOpts = new MqttConnectOptions();
 			
 			connOpts.setCleanSession(true);
@@ -86,15 +88,14 @@ public class SpManager implements SpManagerInterface
 			logger.info("Subscribe to the Topic: " + this.topic);
 
 			
-			client.subscribe("home/Monitoreo/#",0,null,new MqttActionHandler());
-			client.subscribe("home/GetConfiguracion/#",0,null,new MqttActionHandler());
+			client.subscribe(conf.getMonitorTopic(),0,null,new MqttActionHandler());
+			client.subscribe(conf.getGetConfTopic(),0,null,new MqttActionHandler());
 			
 			
 			logger.info("Sucsubscription to topic: " + this.topic); 
 		}
 		catch(Exception me)
 		{
-
 			logger.error("An error has happened: " + me.toString());
 			logger.error("\nmsg " + me.getMessage() + 
 						"\nloc " + me.getLocalizedMessage() + 

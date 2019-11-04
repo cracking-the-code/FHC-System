@@ -28,7 +28,7 @@ public class StoreProcess implements SpInterface
 	
 	public StoreProcess() 
 	{
-		db = new SpMySQL();
+		db = SpMySQL.getInstance();
 	}
 	
 	@Override
@@ -52,6 +52,7 @@ public class StoreProcess implements SpInterface
 			logger.info("Begins the persistence in database");
 			db.insertDevMeasure(measure);
 			db.insertSubMessage(subMessage);
+			//db.closeDB();
 		}
 		catch(Exception e)
 		{
@@ -75,7 +76,7 @@ public class StoreProcess implements SpInterface
 			measure.setVoltage(json.getMeasure().getVoltage());
 			measure.setCharge(json.getMeasure().getCurrent());
 			measure.setTemperature(json.getMeasure().getTemp());
-			measure.setMisc01(json.getMeasure().getHumidity());
+			measure.setMisc01(json.getMeasure().getMisc01());
 			measure.setMisc02(json.getMeasure().getMisc02());
 			measure.setMisc03(json.getMeasure().getMisc03());
 			measure.setMisc04(json.getMeasure().getMisc04());

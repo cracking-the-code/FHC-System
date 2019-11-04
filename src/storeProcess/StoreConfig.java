@@ -27,7 +27,7 @@ public class StoreConfig implements SpInterface
 	
 	public StoreConfig() 
 	{
-		db = new SpMySQL();
+		db = SpMySQL.getInstance();
 	}
 	
 	@Override
