@@ -15,7 +15,7 @@
             <property name="javax.persistence.jdbc.url" value="jdbc:mariadb://192.168.1.102:3306/FHC_DataBase" />
             <property name="javax.persistence.jdbc.user" value="RaspiRoot" />
             <property name="javax.persistence.jdbc.password" value="ASdf12#$" /-->
-            <property name="hibernate.connection.url"          value="jdbc:mariadb://192.168.1.102:3306/FHC_DataBase"/>
+            <property name="hibernate.connection.url"          value="jdbc:mariadb://192.168.0.7:3306/FHC_DataBase"/>
 			<property name="hibernate.connection.username"     value="RaspiRoot"/>
 			<property name="hibernate.connection.password"     value="ASdf12#$"/>
 			<property name="hibernate.connection.driver_class" value="org.mariadb.jdbc.Driver"/>
