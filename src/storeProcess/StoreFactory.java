@@ -2,30 +2,35 @@ package storeProcess;
 
 import java.sql.Timestamp;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 public class StoreFactory implements Runnable 
 {
+	private static Logger logger = LogManager.getLogger(StoreFactory.class);
+	
 	private String topic;
 	private MqttMessage message;
 	private SpInterface sp;
 	
 	private Timestamp time;
 	
-	public StoreFactory()
-	{
-		
-	}
+	public StoreFactory() { }
 	
 	@Override
 	public void run()
 	{
-		//This is the factory
 		sp = spFactory(this.topic);
-		
 		sp.setReceivedMessage(this.time);
 		sp.setTopic(this.topic);
-		sp.storeMessage(this.message);
+		
+		try {	sp.storeMessage(this.message); }
+		catch(Exception e) 
+		{
+			logger.fatal("FATAL ERROR IN STORAGE MESSAGE!!!");
+			logger.fatal(e.getMessage());
+		}
 	}
 	
 	public void messageArrived(String topic, MqttMessage message, Timestamp time)

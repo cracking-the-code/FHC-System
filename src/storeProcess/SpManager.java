@@ -24,27 +24,19 @@ public class SpManager implements SpManagerInterface
 	private ConfigClass conf = ConfigClass.getInstance();
 	
 	private int connections;
-	private String topic;
 	
 	private MqttAsyncClient client;
 	private MqttConnectOptions connOpts;
 	private MemoryPersistence persistence;
 	
 	private ExecutorService pool;
-	private StoreFactory storeFactoryProcess;
 	
 	public SpManager(int connections) 
 	{
 		this.connections = connections;
 		pool = Executors.newFixedThreadPool(connections);
-		storeFactoryProcess = new StoreFactory();
 		configureMqtt();
-	}
-	
-	public SpManager(SpInterface sp, int connections) 
-	{
-		configureMqtt();
-		this.connections = connections;
+		connectMqtt();
 	}
 	
 	private void configureMqtt() 
@@ -74,8 +66,7 @@ public class SpManager implements SpManagerInterface
 		}
 	}
 	
-	@Override
-	public void startSub()
+	private void connectMqtt()
 	{
 		try
 		{
@@ -84,15 +75,24 @@ public class SpManager implements SpManagerInterface
 			
 			token.waitForCompletion();
 			logger.info("Connected to the: " + conf.getServerURI() + " Mqtt Server");
-						
-			logger.info("Subscribe to the Topic: " + this.topic);
-
-			
+		}
+		catch(Exception me)
+		{
+			logger.error("An error has happened: " + me.toString());
+			logger.error("\nmsg " + me.getMessage() + 
+						"\nloc " + me.getLocalizedMessage() + 
+						"\ncause " + me.getCause() + 
+						"\nexcep " + me);
+		}
+	}
+	
+	@Override
+	public void startSub()
+	{
+		try
+		{
 			client.subscribe(conf.getMonitorTopic(),0,null,new MqttActionHandler());
 			client.subscribe(conf.getGetConfTopic(),0,null,new MqttActionHandler());
-			
-			
-			logger.info("Sucsubscription to topic: " + this.topic); 
 		}
 		catch(Exception me)
 		{
@@ -113,7 +113,9 @@ public class SpManager implements SpManagerInterface
 			{
 				Timestamp time = new Timestamp(System.currentTimeMillis());
 				
+				StoreFactory storeFactoryProcess = new StoreFactory();
 				storeFactoryProcess.messageArrived(topic, message, time);
+				
 				pool.execute(storeFactoryProcess);
 				
                 logger.info("\nMensaje Recibido" +
@@ -124,17 +126,7 @@ public class SpManager implements SpManagerInterface
 			}
 			
 			@Override
-			public void deliveryComplete(IMqttDeliveryToken cause)
-			{
-				try
-				{
-					logger.info("Connection to Solace messaging lost!" + cause.getMessage());
-				} 
-				catch (MqttException e)
-				{
-					logger.error(e.getMessage());
-				}
-			}
+			public void deliveryComplete(IMqttDeliveryToken cause) { }
 			
 			@Override
 			public void connectionLost(Throwable token) { }
@@ -155,9 +147,19 @@ public class SpManager implements SpManagerInterface
 			logger.error("Error: " + e.getMessage());
 		}
 	}
+	
+	@Override
+	public void restartClient() 
+	{
+		pool = Executors.newFixedThreadPool(connections);
+		configureMqtt();
+		connectMqtt();
+	}
 
 	@Override
 	public void setConnections(int conn) { this.connections = conn; }
 	@Override
 	public int getConnections() { return this.connections; }
+	@Override
+	public Boolean isConnected() { return client.isConnected(); }
 }

@@ -10,9 +10,6 @@ import javax.persistence.Persistence;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import infraLayer.ConfigDB;
-
-
 public class SpMySQL implements SpDataBaseI
 {
 	private static SpMySQL uniqueInstance;
@@ -36,7 +33,7 @@ public class SpMySQL implements SpDataBaseI
 	
 	private SpMySQL()
 	{
-		logger.info("initializing Data Base Connection...");
+		logger.info("Initializing Data Base Connection...");
 		
 		ENTITY_MANAGER_FACTORY = Persistence
 	            .createEntityManagerFactory("FHC_System");
@@ -182,4 +179,27 @@ public class SpMySQL implements SpDataBaseI
 		logger.info("Closing Data Base Connection...");
 		ENTITY_MANAGER_FACTORY.close();
 	}
+	
+	@Override
+	public void reconnectDB()
+	{
+		try 
+		{
+			logger.info("Restarting Data Base Connection...");
+			logger.info("Closing Data Base Connection...");
+			ENTITY_MANAGER_FACTORY.close();
+			
+			logger.info("Initializing Data Base Connection...");
+			ENTITY_MANAGER_FACTORY = Persistence
+		            .createEntityManagerFactory("FHC_System");
+		}
+		catch(Exception e)
+		{
+			logger.warn("Is not possible to Restart the DB Connection");
+			throw e;
+		}
+	}
+	
+	@Override
+	public Boolean isConnected() { return ENTITY_MANAGER_FACTORY.isOpen(); }
 }
